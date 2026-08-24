@@ -246,7 +246,7 @@ def _spawn_progenitors(n_herb: int, n_carn: int):
 # ── Main Tick Loop ───────────────────────────────────────────────────────
 def tick_loop():
     """Main simulation loop — runs in background thread."""
-    global turn, active_detect_slots
+    global turn, active_detect_slots, sound_emit_queue
     
     init_weight_tensors()
     
