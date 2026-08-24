@@ -5,6 +5,7 @@ Shared snapshot (lock-free reads), Cloudflare tunnel compatible.
 import asyncio
 import json
 import os
+import socket
 import threading
 from pathlib import Path
 from typing import Optional
@@ -323,7 +324,8 @@ async def startup_event():
 # ── Main ─────────────────────────────────────────────────────────────────
 def run_server():
     """Run uvicorn server."""
-    uvicorn.run(app, host="0.0.0.0", port=API_PORT, log_level="warning")
+    uvicorn.run(app, host="0.0.0.0", port=API_PORT, log_level="warning",
+                socket_options=[(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)])
 
 if __name__ == "__main__":
     run_server()
