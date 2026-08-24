@@ -15,11 +15,11 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from config import DRIVE_BASE, API_PORT, WS_PUSH_INTERVAL
-from tick_loop import (latest_snapshot, snapshot_version, snapshot_lock,
+from .config import DRIVE_BASE, API_PORT, WS_PUSH_INTERVAL
+from .tick_loop import (latest_snapshot, snapshot_version, snapshot_lock,
                        control_command, control_lock, sim_paused, sim_stop,
                        sim_speed, turn, _spawn_progenitors)
-from animal_model import (alive, species, x_pos, y_pos, energy, health, fatigue,
+from .animal_model import (alive, species, x_pos, y_pos, energy, health, fatigue,
                           age, animal_ids, id_to_slot, generation,
                           traits_shared, count_herbivores, count_carnivores)
 
@@ -221,7 +221,7 @@ async def stop_sim():
 
 @app.post("/api/control/seed")
 async def set_seed(value: int = Body(..., embed=True)):
-    from rng import reseed
+    from .rng import reseed
     reseed(value)
     return {"seed": value}
 
@@ -235,8 +235,8 @@ async def restart_sim():
     
     # Reset will be handled by tick_loop restarting
     # For now just reset state
-    from animal_model import reset_arrays
-    from world import init_world
+    from .animal_model import reset_arrays
+    from .world import init_world
     reset_arrays()
     init_world(seed=42)
     _spawn_progenitors(20, 5)

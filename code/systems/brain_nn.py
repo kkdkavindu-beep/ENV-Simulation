@@ -2,8 +2,8 @@
 Neural Network — Batched Einsum Forward Pass
 """
 import numpy as np
-from config import *
-from rng import get_rng
+from .config import *
+from .rng import get_rng
 
 # Weight tensors (imported from animal_model to avoid circular import)
 W1_h = W2_h = W3_h = b1_h = b2_h = b3_h = None
@@ -69,14 +69,14 @@ def build_inputs(idx: np.ndarray,
         inputs[:, 16:24] = sound_inputs
     
     # Internal state (24-27): energy, health, age_norm, fatigue_norm
-    from animal_model import energy, health, age, fatigue, traits_shared
+    from .animal_model import energy, health, age, fatigue, traits_shared
     inputs[:, 24] = energy[idx]
     inputs[:, 25] = health[idx]
     inputs[:, 26] = age[idx].astype(np.float32) / traits_shared[idx, T_LIFESPAN]
     inputs[:, 27] = fatigue[idx] / traits_shared[idx, T_ENDURANCE]
     
     # Memory inputs (28-31): 4 selected cells
-    from animal_model import memory
+    from .animal_model import memory
     mem_vals = memory[idx]  # (N, 16) uint8
     row_idx = np.arange(N)[:, None]
     inputs[:, 28:32] = mem_vals[row_idx, mem_read_idx].astype(np.float32) / 255.0

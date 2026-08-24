@@ -3,8 +3,8 @@ Sound System — Fixed-Array Inbox (No Heap)
 """
 import numpy as np
 import math
-from config import *
-from animal_model import (x_pos, y_pos, alive, species, animal_ids, id_to_slot,
+from .config import *
+from .animal_model import (x_pos, y_pos, alive, species, animal_ids, id_to_slot,
                           animal_grid, traits_shared, M_F, infant_factor,
                           sound_inbox)
 
@@ -140,7 +140,7 @@ def add_carcass_scent_to_inbox(carcass_grid_arr, x_pos_arr, y_pos_arr,
                                sound_inbox_arr, alive_arr, species_arr,
                                traits_shared_arr):
     """Add carcass scent (type 15) to nearby carnivores' inboxes."""
-    from animal_model import carc_x, carc_y, carc_ep, carc_alive
+    from .animal_model import carc_x, carc_y, carc_ep, carc_alive
     
     carc_indices = np.where(carc_alive)[0]
     for idx in carc_indices:

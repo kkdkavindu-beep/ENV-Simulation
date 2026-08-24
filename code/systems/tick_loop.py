@@ -4,9 +4,9 @@ Simulation Tick Loop — Unified Phases, Numba Detection
 import time
 import numpy as np
 import threading
-from config import *
-from rng import get_rng, reseed
-from animal_model import (alive, species, x_pos, y_pos, energy, health, fatigue, age,
+from .config import *
+from .rng import get_rng, reseed
+from .animal_model import (alive, species, x_pos, y_pos, energy, health, fatigue, age,
                           memory, traits_shared, traits_carn, traits_herb,
                           M_F, infant_factor, mate_seek_timer, generation,
                           genomes, genome_valid, animal_ids, id_to_slot,
@@ -18,21 +18,21 @@ from animal_model import (alive, species, x_pos, y_pos, energy, health, fatigue,
                           W1_h, b1_h, W2_h, b2_h, W3_h, b3_h,
                           W1_c, b1_c, W2_c, b2_c, W3_c, b3_c,
                           sound_inbox)
-from world import (update_obstacles_vectorized, update_herbs_vectorized,
+from .world import (update_obstacles_vectorized, update_herbs_vectorized,
                    update_carcasses_vectorized, spawn_carcass, rebuild_grids)
-from genome_traits import (compute_infant_factor_vectorized, populate_trait_cache,
+from .genome_traits import (compute_infant_factor_vectorized, populate_trait_cache,
                            load_weights_from_genome)
-from mutation_repro import (create_offspring, find_reproduction_pairs, update_mate_seek)
-from brain_nn import (run_nn_tick, decode_outputs, set_weight_tensors,
+from .mutation_repro import (create_offspring, find_reproduction_pairs, update_mate_seek)
+from .brain_nn import (run_nn_tick, decode_outputs, set_weight_tensors,
                       get_memory_read_idx, update_memory_read_idx)
-from detection import (run_detection_batch, resolve_target_lock)
-from sound import (broadcast_sounds_vectorized, add_carcass_scent_to_inbox,
+from .detection import (run_detection_batch, resolve_target_lock)
+from .sound import (broadcast_sounds_vectorized, add_carcass_scent_to_inbox,
                    build_sound_inputs_batch)
-from energy import (apply_all_costs, feed_from_herb, feed_from_carcass,
+from .energy import (apply_all_costs, feed_from_herb, feed_from_carcass,
                     attack_energy_gain, apply_transfer_gain)
-from fatigue import (recover_fatigue, compute_M_F, accumulate_fatigue)
-from memory import blend_memory
-from logging_module import (log_tick, log_birth, log_death, log_event,
+from .fatigue import (recover_fatigue, compute_M_F, accumulate_fatigue)
+from .memory import blend_memory
+from .logging_module import (log_tick, log_birth, log_death, log_event,
                             ids_writer, dynamic_writer)
 
 # ── Inter-thread Communication ───────────────────────────────────────────
@@ -164,7 +164,7 @@ def _get_recent_events():
 def checkpoint_to_drive(turn_num: int):
     """Save checkpoint to Google Drive."""
     import pickle, zlib, os
-    from config import DRIVE_BASE, RUN_ID
+    from .config import DRIVE_BASE, RUN_ID
     
     chk_dir = os.path.join(DRIVE_BASE, RUN_ID, "checkpoints")
     os.makedirs(chk_dir, exist_ok=True)
@@ -213,7 +213,7 @@ def checkpoint_to_drive(turn_num: int):
 
 # ── Progenitor Spawning ──────────────────────────────────────────────────
 def _spawn_progenitors(n_herb: int, n_carn: int):
-    from genome_traits import create_progenitor_genome
+    from .genome_traits import create_progenitor_genome
     
     for _ in range(n_herb):
         slot = allocate_slot()
@@ -329,7 +329,7 @@ def tick_loop():
                     dir_n = decoded_h["detect_dir"][i]
                     range_n = decoded_h["detect_range"][i]
                     angle_n = decoded_h["detect_angle"][i]
-                    from brain_nn import decode_detection_params
+                    from .brain_nn import decode_detection_params
                     theta, R, alpha = decode_detection_params(
                         np.array([dir_n]), np.array([range_n]), np.array([angle_n])
                     )
@@ -344,7 +344,7 @@ def tick_loop():
                     dir_n = decoded_c["detect_dir"][i]
                     range_n = decoded_c["detect_range"][i]
                     angle_n = decoded_c["detect_angle"][i]
-                    from brain_nn import decode_detection_params
+                    from .brain_nn import decode_detection_params
                     theta, R, alpha = decode_detection_params(
                         np.array([dir_n]), np.array([range_n]), np.array([angle_n])
                     )
@@ -591,4 +591,4 @@ def _collect_actions_carn(slot, i, decoded, feed_queue, reproduce_queue,
     memory_write_queue.append((slot, decoded["mem_write_idx"][i], decoded["mem_write_val"][i]))
 
 # Import needed for action collection
-from animal_model import get_effective_speed, get_effective_stealth_power, get_effective_attack
+from .animal_model import get_effective_speed, get_effective_stealth_power, get_effective_attack

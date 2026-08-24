@@ -2,8 +2,8 @@
 Memory System — Integer Blend, 16 Cells
 """
 import numpy as np
-from config import *
-from animal_model import memory
+from .config import *
+from .animal_model import memory
 
 # Memory read history (track last 4 written indices)
 mem_read_history = np.zeros((MAX_ANIMALS, MEMORY_READ_CELLS), dtype=np.int8)

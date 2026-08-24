@@ -3,15 +3,15 @@ Mutation and Reproduction — Vectorized, Persistent Mate-Seeking
 """
 import numpy as np
 import math
-from config import *
-from rng import get_rng
-from animal_model import (register_animal, release_slot, allocate_slot,
+from .config import *
+from .rng import get_rng
+from .animal_model import (register_animal, release_slot, allocate_slot,
                           x_pos, y_pos, energy, alive, species,
                           genomes, genome_valid, generation,
                           animal_grid, grid_cell, animal_ids,
                           traits_shared, traits_carn, traits_herb,
                           M_F, infant_factor, mate_seek_timer)
-from genome_traits import (inherit_genome, populate_trait_cache,
+from .genome_traits import (inherit_genome, populate_trait_cache,
                            load_weights_from_genome)
 
 # ── Reproduction ─────────────────────────────────────────────────────────
@@ -81,7 +81,7 @@ def find_reproduction_pairs(reproduce_signals: np.ndarray) -> list[tuple[int, in
     Match animals in mate-seeking state within radius.
     Returns list of (slot_A, slot_B) pairs.
     """
-    from animal_model import x_pos, y_pos, alive, species
+    from .animal_model import x_pos, y_pos, alive, species
     
     pairs = []
     rng = get_rng()

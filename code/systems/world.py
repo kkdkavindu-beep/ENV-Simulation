@@ -4,9 +4,9 @@ Cell-based obstacles with local density regulation.
 """
 import numpy as np
 import math
-from config import *
-from rng import get_rng
-from animal_model import (obstacle_grid, herb_grid, carcass_grid, animal_grid,
+from .config import *
+from .rng import get_rng
+from .animal_model import (obstacle_grid, herb_grid, carcass_grid, animal_grid,
                           obs_I, obs_R, obs_D, obs_x, obs_y, obs_alive,
                           herb_x, herb_y, herb_ep, herb_alive,
                           carc_x, carc_y, carc_ep, carc_age, carc_alive,
@@ -40,7 +40,7 @@ def compute_D_local(R_val: float) -> float:
 # ── World Initialization ─────────────────────────────────────────────────
 def init_world(seed: int = 42):
     """Initialize world: obstacles, herbs, carcasses."""
-    from rng import reseed
+    from .rng import reseed
     reseed(seed)
     rng = get_rng()
     

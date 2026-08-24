@@ -2,8 +2,8 @@
 Fatigue System — Normalized to Endurance
 """
 import numpy as np
-from config import *
-from animal_model import (fatigue, traits_shared, M_F, alive)
+from .config import *
+from .animal_model import (fatigue, traits_shared, M_F, alive)
 
 def recover_fatigue(alive_idx: np.ndarray):
     """Fatigue recovery: -0.2 per tick (2.0/sec)"""

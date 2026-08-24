@@ -4,8 +4,8 @@ Active Detection — Numba JIT Accelerated
 import numpy as np
 import math
 from numba import jit
-from config import *
-from animal_model import (x_pos, y_pos, alive, species, animal_ids, id_to_slot,
+from .config import *
+from .animal_model import (x_pos, y_pos, alive, species, animal_ids, id_to_slot,
                           animal_grid, herb_grid, obstacle_grid,
                           traits_shared, traits_carn, traits_herb,
                           M_F, infant_factor, last_scan, last_decoded)
@@ -174,7 +174,7 @@ def get_detection_candidates(slot: int, theta: float, R: float, alpha: float
     return np.array(candidates, dtype=np.float32)
 
 # Need to import obstacle_positions
-from animal_model import obstacle_positions, herb_positions
+from .animal_model import obstacle_positions, herb_positions
 
 # ── Batch Detection Runner ───────────────────────────────────────────────
 def run_detection_batch(active_slots, x_pos_arr, y_pos_arr,

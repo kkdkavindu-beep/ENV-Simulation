@@ -6,8 +6,8 @@ import json
 import orjson
 import os
 import threading
-from config import DRIVE_BASE, RUN_ID, LOG_MODE, LOG_SAMPLE_RATE
-from animal_model import (alive, species, x_pos, y_pos, energy, health, fatigue, age,
+from .config import DRIVE_BASE, RUN_ID, LOG_MODE, LOG_SAMPLE_RATE
+from .animal_model import (alive, species, x_pos, y_pos, energy, health, fatigue, age,
                           animal_ids, generation, traits_shared, traits_carn, traits_herb)
 
 # ── Log Writers ──────────────────────────────────────────────────────────
@@ -169,4 +169,4 @@ def log_sound_emission(emitter_id: str, signal_type: int, strength: float):
 
 # Import needed
 import numpy as np
-from animal_model import turn as animal_turn, herb_alive, herb_x, herb_y, herb_ep, carc_alive, carc_x, carc_y, carc_ep
+from .animal_model import turn as animal_turn, herb_alive, herb_x, herb_y, herb_ep, carc_alive, carc_x, carc_y, carc_ep

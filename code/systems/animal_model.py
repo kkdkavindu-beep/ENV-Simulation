@@ -3,8 +3,8 @@ Animal Data Model — Pure NumPy SoA Layout
 Zero Python objects in hot path.
 """
 import numpy as np
-from config import *
-from rng import get_rng
+from .config import *
+from .rng import get_rng
 
 # ── SoA Arrays ───────────────────────────────────────────────────────────
 alive          = np.zeros(MAX_ANIMALS, dtype=np.bool_)

@@ -3,7 +3,7 @@ Deterministic RNG — single seeded generator for reproducibility.
 All randomness in the simulation flows through this.
 """
 import numpy as np
-from config import DEFAULT_SEED
+from .config import DEFAULT_SEED
 
 # Global generator
 _rng: np.random.Generator = None

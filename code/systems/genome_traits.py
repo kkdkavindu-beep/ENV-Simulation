@@ -2,8 +2,8 @@
 Genome and Traits — Flat Binary Layout, Vectorized Operations
 """
 import numpy as np
-from config import *
-from rng import get_rng
+from .config import *
+from .rng import get_rng
 
 # Trait name list for JSON serialization
 TRAIT_NAMES = [
@@ -86,7 +86,7 @@ def populate_trait_cache(slot: int, genome_flat: np.ndarray, is_herb: bool):
     traits = resolve_dominance_vectorized(genome_flat)
     
     # Shared traits (9)
-    from animal_model import traits_shared, traits_carn, traits_herb
+    from .animal_model import traits_shared, traits_carn, traits_herb
     traits_shared[slot] = traits[0:9]
     
     if is_herb:
@@ -160,7 +160,7 @@ def inherit_genome(genome_A: np.ndarray, genome_B: np.ndarray, is_herb: bool) ->
 # ── Weight Loading ───────────────────────────────────────────────────────
 def load_weights_from_genome(slot: int, genome_flat: np.ndarray, is_herb: bool):
     """Reshape genome brain weights into SoA tensors. Called once at creation."""
-    from animal_model import (W1_h, b1_h, W2_h, b2_h, W3_h, b3_h,
+    from .animal_model import (W1_h, b1_h, W2_h, b2_h, W3_h, b3_h,
                                W1_c, b1_c, W2_c, b2_c, W3_c, b3_c)
     
     n_weights = BRAIN_WEIGHTS_REDUCED if USE_REDUCED_ARCH else BRAIN_WEIGHTS_FULL
@@ -227,7 +227,7 @@ def genome_to_json(genome_flat: np.ndarray) -> dict:
 # ── Infant Factor ────────────────────────────────────────────────────────
 def compute_infant_factor_vectorized(alive_idx: np.ndarray):
     """Compute infant factor for all alive animals."""
-    from animal_model import age, traits_shared, infant_factor
+    from .animal_model import age, traits_shared, infant_factor
     
     lifespan = traits_shared[alive_idx, T_LIFESPAN].astype(np.float32)
     infant_thresh = INFANT_LIFESPAN_FRAC * lifespan

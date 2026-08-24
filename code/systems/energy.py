@@ -3,8 +3,8 @@ Energy System — Unified Phase 5 Cost Application
 All energy costs applied in single vectorized pass.
 """
 import numpy as np
-from config import *
-from animal_model import (energy, alive, traits_shared, traits_carn, traits_herb,
+from .config import *
+from .animal_model import (energy, alive, traits_shared, traits_carn, traits_herb,
                           M_F, infant_factor, x_pos, y_pos, fatigue, health,
                           active_stealth_boost)
 
@@ -20,7 +20,7 @@ def apply_movement_cost(move_slots: np.ndarray, dx: np.ndarray, dy: np.ndarray):
     move_cost = MOVE_COST_FACTOR * (dx * dx + dy * dy)
     energy[move_slots] -= move_cost
     # Movement fatigue
-    from animal_model import fatigue
+    from .animal_model import fatigue
     fatigue[move_slots] += MOVE_FATIGUE_FACTOR * (np.abs(dx) + np.abs(dy))
 
 def apply_detection_cost(detect_slots: np.ndarray, R_eff: np.ndarray, alpha: np.ndarray):
@@ -30,7 +30,7 @@ def apply_detection_cost(detect_slots: np.ndarray, R_eff: np.ndarray, alpha: np.
     det_cost = DETECTION_COST_FACTOR * R_eff * R_eff * (alpha / np.pi)
     energy[detect_slots] -= det_cost
     # Detection fatigue
-    from animal_model import fatigue
+    from .animal_model import fatigue
     fatigue[detect_slots] += np.where(R_eff > 50, DETECTION_FATIGUE_LARGE, DETECTION_FATIGUE_SMALL)
 
 def apply_attack_cost(attacker_slots: np.ndarray, eff_attack: np.ndarray):
@@ -40,7 +40,7 @@ def apply_attack_cost(attacker_slots: np.ndarray, eff_attack: np.ndarray):
     atk_cost = ATTACK_COST_FACTOR * eff_attack
     energy[attacker_slots] -= atk_cost
     # Attack fatigue
-    from animal_model import fatigue
+    from .animal_model import fatigue
     fatigue[attacker_slots] += ATTACK_FATIGUE
 
 def apply_sound_cost(emit_slots: np.ndarray, S_emit: np.ndarray):
