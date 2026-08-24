@@ -129,7 +129,7 @@ async def get_world():
 
 @app.get("/api/animals")
 async def get_animals(
-    species_filter: Optional[str] = Query(None, regex="^(herbivore|carnivore)$"),
+    species_filter: Optional[str] = Query(None, pattern="^(herbivore|carnivore)$"),
     limit: int = Query(100, ge=1, le=2000),
     offset: int = Query(0, ge=0)
 ):

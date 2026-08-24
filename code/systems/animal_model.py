@@ -81,10 +81,10 @@ last_decoded: list[dict | None] = [None] * MAX_ANIMALS
 sound_inbox = np.zeros((MAX_ANIMALS, 4, 3), dtype=np.float32)
 
 # ── Spatial Grids (set by world module) ──────────────────────────────────
-animal_grid   = None
-herb_grid     = None
-obstacle_grid = None
-carcass_grid  = None
+animal_grid   = [[set() for _ in range(GRID_DIM)] for _ in range(GRID_DIM)]
+herb_grid     = [[set() for _ in range(GRID_DIM)] for _ in range(GRID_DIM)]
+obstacle_grid = [[set() for _ in range(GRID_DIM)] for _ in range(GRID_DIM)]
+carcass_grid  = [[set() for _ in range(GRID_DIM)] for _ in range(GRID_DIM)]
 
 # Herb positions (for detection)
 herb_positions: dict[str, tuple] = {}
