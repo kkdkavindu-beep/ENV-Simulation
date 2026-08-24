@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENV Simulation Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Monospace', monospace; background: #0d1117; color: #e6edf3; line-height: 1.4; }
+        .header { background: #161b22; border-bottom: 1px solid #30363d; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .header h1 { font-size: 14px; font-weight: 600; color: #58a6ff; }
+        .controls { display: flex; gap: 8px; align-items: center; }
+        .btn { background: #238636; border: none; color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-family: inherit; }
+        .btn:hover { background: #2ea043; }
+        .btn:disabled { background: #484f58; cursor: not-allowed; }
+        .btn.danger { background: #da3633; }
+        .btn.danger:hover { background: #f85149; }
+        .btn.secondary { background: #30363d; }
+        .speed-control { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+        .status-indicator { width: 8px; height: 8px; border-radius: 50%; background: #2ea043; }
+        .status-indicator.paused { background: #d29922; }
+        .status-indicator.stopped { background: #da3633; }
+        
+        .main { display: grid; grid-template-columns: 380px 1fr; height: calc(100vh - 56px); }
+        .sidebar { background: #161b22; border-right: 1px solid #30363d; overflow-y: auto; padding: 16px; }
+        .panel { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 16px; margin-bottom: 16px; }
+        .panel h2 { font-size: 12px; font-weight: 600; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+        .stat-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+        .stat-label { color: #8b949e; }
+        .stat-value { color: #e6edf3; font-family: monospace; }
+        .stat-value.highlight { color: #a5d6ff; }
+        
+        .map-container { position: relative; background: #0d1117; }
+        #map-canvas { width: 100%; height: 100%; display: block; }
+        .map-overlay { position: absolute; top: 16px; right: 16px; background: rgba(13,17,23,0.9); border: 1px solid #30363d; border-radius: 6px; padding: 12px; font-size: 11px; min-width: 180px; }
+        .legend-item { display: flex; align-items: center; gap: 6px; margin: 4px 0; }
+        .legend-color { width: 12px; height: 12px; border-radius: 2px; }
+        
+        .animal-list { max-height: 300px; overflow-y: auto; }
+        .animal-row { display: flex; justify-content: space-between; padding: 6px 8px; border-bottom: 1px solid #21262d; font-size: 11px; cursor: pointer; transition: background 0.1s; }
+        .animal-row:hover { background: #1f2428; }
+        .animal-row.selected { background: #1f6feb33; }
+        .animal-info { display: flex; flex-direction: column; gap: 2px; }
+        .animal-id { font-weight: 600; }
+        .animal-meta { color: #8b949e; font-size: 10px; }
+        .animal-stats { text-align: right; }
+        
+        .detail-panel { display: none; }
+        .detail-panel.visible { display: block; }
+        .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .detail-item { background: #0d1117; border: 1px solid #30363d; border-radius: 4px; padding: 8px; }
+        .detail-label { font-size: 10px; color: #8b949e; text-transform: uppercase; }
+        .detail-value { font-size: 13px; font-family: monospace; }
+        
+        .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 16px; }
+        .chart-panel { background: #161b22; border: 1px solid #30363d; border-radius: 6px; height: 200px; position: relative; }
+        .chart-canvas { width: 100%; height: 100%; }
+        
+        @media (max-width: 1000px) {
+            .main { grid-template-columns: 1fr; }
+            .sidebar { max-height: 40vh; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>ENV SIMULATION</h1>
+        <div class="controls">
+            <div class="speed-control">
+                <span>Speed:</span>
+                <input type="range" id="speed-slider" min="1" max="200" value="50" style="width: 100px;">
+                <span id="speed-value">50</span>
+            </div>
+            <button class="btn" id="btn-pause">Pause</button>
+            <button class="btn" id="btn-resume" disabled>Resume</button>
+            <button class="btn secondary" id="btn-restart">Restart</button>
+            <span class="status-indicator" id="status-indicator"></span>
+        </div>
+    </header>
+    
+    <main class="main">
+        <aside class="sidebar">
+            <div class="panel">
+                <h2>World State</h2>
+                <div class="stat-row"><span class="stat-label">Turn</span><span class="stat-value highlight" id="stat-turn">0</span></div>
+                <div class="stat-row"><span class="stat-label">Herbivores</span><span class="stat-value" id="stat-herb">0</span></div>
+                <div class="stat-row"><span class="stat-label">Carnivores</span><span class="stat-value" id="stat-carn">0</span></div>
+                <div class="stat-row"><span class="stat-label">Plants</span><span class="stat-value" id="stat-plants">0</span></div>
+                <div class="stat-row"><span class="stat-label">Carcasses</span><span class="stat-value" id="stat-carcasses">0</span></div>
+                <div class="stat-row"><span class="stat-label">Obstacles</span><span class="stat-value" id="stat-obstacles">0</span></div>
+                <div class="stat-row"><span class="stat-label">Sim Speed</span><span class="stat-value" id="stat-speed">0</span> t/s</div>
+            </div>
+            
+            <div class="panel">
+                <h2>Animals</h2>
+                <div class="animal-list" id="animal-list">
+                    <div style="color:#8b949e; font-size:12px; text-align:center; padding:20px;">No animals</div>
+                </div>
+            </div>
+        </aside>
+        
+        <section class="map-container">
+            <canvas id="map-canvas"></canvas>
+            <div class="map-overlay">
+                <div class="legend-item"><span class="legend-color" style="background:#58a6ff;"></span> Herbivore</div>
+                <div class="legend-item"><span class="legend-color" style="background:#f78166;"></span> Carnivore</div>
+                <div class="legend-item"><span class="legend-color" style="background:#3fb950;"></span> Plant</div>
+                <div class="legend-item"><span class="legend-color" style="background:#a371f7;"></span> Carcass</div>
+                <div class="legend-item"><span class="legend-color" style="background:#8b949e;"></span> Obstacle</div>
+                <div style="margin-top:12px; padding-top:12px; border-top:1px solid #30363d;">
+                    <div id="hover-info" style="font-size:10px; color:#8b949e;">Hover an entity</div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <div class="detail-panel" id="detail-panel">
+        <div class="panel" style="margin:0; border-radius:0; border-left:1px solid #30363d;">
+            <h2>Animal Details <span id="detail-id" style="font-weight:normal; color:#8b949e;"></span></h2>
+            <div class="detail-grid" id="detail-grid"></div>
+        </div>
+    </div>
+
+    <script>
+        // ── State ────────────────────────────────────────────────────────
+        let ws = null;
+        let snapshot = null;
+        let selectedAnimal = null;
+        let animFrame = null;
+        const canvas = document.getElementById('map-canvas');
+        const ctx = canvas.getContext('2d');
+        const WORLD_SIZE = 1000;
+        
+        // ── WebSocket ────────────────────────────────────────────────────
+        function connectWS() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/live`;
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = () => console.log('WS connected');
+            ws.onmessage = (event) => {
+                snapshot = JSON.parse(event.data);
+                updateUI(snapshot);
+                drawMap(snapshot);
+            };
+            ws.onclose = () => {
+                console.log('WS closed, reconnecting...');
+                setTimeout(connectWS, 2000);
+            };
+            ws.onerror = (e) => console.error('WS error', e);
+        }
+        
+        // ── UI Updates ───────────────────────────────────────────────────
+        function updateUI(snap) {
+            document.getElementById('stat-turn').textContent = snap.turn;
+            document.getElementById('stat-herb').textContent = snap.world.herbivore_count;
+            document.getElementById('stat-carn').textContent = snap.world.carnivore_count;
+            document.getElementById('stat-plants').textContent = snap.world.herb_count;
+            document.getElementById('stat-carcasses').textContent = snap.world.carcass_count;
+            document.getElementById('stat-obstacles').textContent = snap.world.obstacle_count;
+            document.getElementById('stat-speed').textContent = snap.sim_speed || 0;
+            
+            // Status indicator
+            const indicator = document.getElementById('status-indicator');
+            indicator.classList.remove('paused', 'stopped');
+            if (snap.paused) indicator.classList.add('paused');
+            if (snap.stopped) indicator.classList.add('stopped');
+            
+            // Animal list
+            renderAnimalList(snap.animals || []);
+        }
+        
+        function renderAnimalList(animals) {
+            const container = document.getElementById('animal-list');
+            if (animals.length === 0) {
+                container.innerHTML = '<div style="color:#8b949e; font-size:12px; text-align:center; padding:20px;">No animals</div>';
+                return;
+            }
+            
+            container.innerHTML = animals.map(a => `
+                <div class="animal-row${selectedAnimal === a.id ? ' selected' : ''}" data-id="${a.id}">
+                    <div class="animal-info">
+                        <span class="animal-id">${a.id}</span>
+                        <span class="animal-meta">Gen ${a.generation} • Age ${a.age}/${a.lifespan || '?'}</span>
+                    </div>
+                    <div class="animal-stats">
+                        <div>E: ${a.energy.toFixed(1)}</div>
+                        <div style="font-size:10px; color:#8b949e;">H: ${a.health.toFixed(1)} F: ${a.fatigue.toFixed(1)}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Click handlers
+            container.querySelectorAll('.animal-row').forEach(row => {
+                row.addEventListener('click', () => selectAnimal(row.dataset.id));
+            });
+        }
+        
+        function selectAnimal(id) {
+            selectedAnimal = id;
+            const animal = (snapshot?.animals || []).find(a => a.id === id);
+            if (!animal) return;
+            
+            document.querySelectorAll('.animal-row').forEach(r => 
+                r.classList.toggle('selected', r.dataset.id === id)
+            );
+            
+            const panel = document.getElementById('detail-panel');
+            panel.classList.add('visible');
+            document.getElementById('detail-id').textContent = `— ${animal.id}`;
+            
+            const isHerb = animal.species === 'herbivore';
+            document.getElementById('detail-grid').innerHTML = `
+                <div class="detail-item"><span class="detail-label">Species</span><span class="detail-value">${animal.species}</span></div>
+                <div class="detail-item"><span class="detail-label">Generation</span><span class="detail-value">${animal.generation}</span></div>
+                <div class="detail-item"><span class="detail-label">Position</span><span class="detail-value">${animal.x.toFixed(1)}, ${animal.y.toFixed(1)}</span></div>
+                <div class="detail-item"><span class="detail-label">Age</span><span class="detail-value">${animal.age} / ?</span></div>
+                <div class="detail-item"><span class="detail-label">Energy</span><span class="detail-value">${animal.energy.toFixed(1)}</span></div>
+                <div class="detail-item"><span class="detail-label">Health</span><span class="detail-value">${animal.health.toFixed(1)}</span></div>
+                <div class="detail-item"><span class="detail-label">Fatigue</span><span class="detail-value">${animal.fatigue.toFixed(1)}</span></div>
+                <div class="detail-item"><span class="detail-label">Speed</span><span class="detail-value">${(isHerb ? 30 : 18).toFixed(1)}</span></div>
+            `;
+        }
+        
+        // ── Map Rendering ────────────────────────────────────────────────
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        
+        function worldToCanvas(x, y) {
+            return {
+                x: (x / WORLD_SIZE) * canvas.width,
+                y: (y / WORLD_SIZE) * canvas.height
+            };
+        }
+        
+        function drawMap(snap) {
+            if (!snap) return;
+            resizeCanvas();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Grid lines (subtle)
+            ctx.strokeStyle = '#1f2428';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i <= 10; i++) {
+                const pos = (i / 10) * canvas.width;
+                ctx.beginPath();
+                ctx.moveTo(pos, 0); ctx.lineTo(pos, canvas.height);
+                ctx.moveTo(0, pos); ctx.lineTo(canvas.width, pos);
+                ctx.stroke();
+            }
+            
+            // Obstacles
+            ctx.fillStyle = '#8b949e';
+            // (obstacles not in snapshot, skip for now)
+            
+            // Plants
+            ctx.fillStyle = '#3fb950';
+            (snap.herbs || []).forEach(h => {
+                const p = worldToCanvas(h.x, h.y);
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, Math.max(2, 4 * (h.ep / 50)), 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Carcasses
+            ctx.fillStyle = '#a371f7';
+            (snap.carcasses || []).forEach(c => {
+                const p = worldToCanvas(c.x, c.y);
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, Math.max(3, 6 * (c.ep / 300)), 0, Math.PI * 2);
+                ctx.fill();
+            });
+            
+            // Animals
+            (snap.animals || []).forEach(a => {
+                const p = worldToCanvas(a.x, a.y);
+                const isHerb = a.species === 'herbivore';
+                ctx.fillStyle = isHerb ? '#58a6ff' : '#f78166';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Energy ring
+                ctx.strokeStyle = isHerb ? '#58a6ff88' : '#f7816688';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 8 * (a.energy / (isHerb ? 480 : 600)), -Math.PI/2, Math.PI/2 * 3);
+                ctx.stroke();
+                
+                // Selection highlight
+                if (selectedAnimal === a.id) {
+                    ctx.strokeStyle = '#ffd33d';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            });
+            
+            // Hover info (simple - could be enhanced)
+        }
+        
+        // ── Controls ─────────────────────────────────────────────────────
+        document.getElementById('btn-pause').addEventListener('click', () => sendControl('pause'));
+        document.getElementById('btn-resume').addEventListener('click', () => sendControl('resume'));
+        document.getElementById('btn-restart').addEventListener('click', () => sendControl('restart'));
+        
+        const speedSlider = document.getElementById('speed-slider');
+        const speedValue = document.getElementById('speed-value');
+        speedSlider.addEventListener('input', (e) => {
+            speedValue.textContent = e.target.value;
+        });
+        speedSlider.addEventListener('change', (e) => {
+            sendControl('speed', parseInt(e.target.value));
+        });
+        
+        function sendControl(action, value) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ action, value }));
+            }
+            // Update local button states
+            if (action === 'pause') {
+                document.getElementById('btn-pause').disabled = true;
+                document.getElementById('btn-resume').disabled = false;
+            } else if (action === 'resume') {
+                document.getElementById('btn-pause').disabled = false;
+                document.getElementById('btn-resume').disabled = true;
+            }
+        }
+        
+        // ── Init ─────────────────────────────────────────────────────────
+        window.addEventListener('resize', () => {
+            if (snapshot) drawMap(snapshot);
+        });
+        
+        connectWS();
+    </script>
+</body>
+</html>
