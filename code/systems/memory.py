@@ -28,8 +28,8 @@ def blend_memory(alive_idx: np.ndarray, write_idx: np.ndarray, write_val: np.nda
         idx = write_idx[i]
         val = write_val[i]
         old = memory[slot, idx]
-        # Integer arithmetic: (old * 7 + val * 3 + 5) // 10
-        memory[slot, idx] = np.clip((old * MEMORY_BLEND_OLD + val * MEMORY_BLEND_NEW + 5) // MEMORY_BLEND_DIV, 0, 255).astype(np.uint8)
+        # Integer arithmetic: cast to int to avoid uint8 overflow
+        memory[slot, idx] = np.clip((int(old) * MEMORY_BLEND_OLD + int(val) * MEMORY_BLEND_NEW + 5) // MEMORY_BLEND_DIV, 0, 255).astype(np.uint8)
         update_memory_read_idx(slot, idx)
 
 def clear_memory(slot: int):

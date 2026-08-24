@@ -8,7 +8,8 @@ from .config import *
 from .animal_model import (x_pos, y_pos, alive, species, animal_ids, id_to_slot,
                           animal_grid, herb_grid, obstacle_grid,
                           traits_shared, traits_carn, traits_herb,
-                          M_F, infant_factor, last_scan, last_decoded)
+                          M_F, infant_factor, last_scan, last_decoded,
+                          herb_positions)
 
 # ── Numba JIT Detection Kernel ───────────────────────────────────────────
 @jit(nopython=True, cache=True)
@@ -176,7 +177,6 @@ def get_detection_candidates(slot: int, theta: float, R: float, alpha: float
 # ── Batch Detection Runner ───────────────────────────────────────────────
 def run_detection_batch(active_slots, x_pos_arr, y_pos_arr,
                         animal_grid_arr, herb_grid_arr, obstacle_grid_arr,
-                        traits_shared_arr, traits_carn_arr, traits_herb_arr,
                         M_F_arr, infant_factor_arr, species_arr, alive_arr):
     """
     Run detection for all active detectors this tick.

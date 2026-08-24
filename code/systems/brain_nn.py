@@ -117,9 +117,8 @@ def decode_detection_params(dir_n: np.ndarray, range_n: np.ndarray, angle_n: np.
     return theta, R, alpha
 
 # ── Memory Read Index ────────────────────────────────────────────────────
-# Track last 4 written indices per animal for reading
-mem_read_history = np.zeros((MAX_ANIMALS, MEMORY_READ_CELLS), dtype=np.int8)
-mem_read_ptr = np.zeros(MAX_ANIMALS, dtype=np.int8)
+# mem_read_history and mem_read_ptr are maintained in memory.py — import from there.
+from .memory import mem_read_history, mem_read_ptr
 
 def update_memory_read_idx(slot: int, write_idx: int):
     """Call after memory write to update read history."""

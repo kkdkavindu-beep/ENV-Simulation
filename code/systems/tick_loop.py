@@ -17,7 +17,10 @@ from .animal_model import (alive, species, x_pos, y_pos, energy, health, fatigue
                           last_scan, last_decoded, active_stealth_boost,
                           W1_h, b1_h, W2_h, b2_h, W3_h, b3_h,
                           W1_c, b1_c, W2_c, b2_c, W3_c, b3_c,
-                          sound_inbox)
+                          sound_inbox,
+                          herb_alive, herb_x, herb_y, herb_ep,
+                          carc_alive, carc_x, carc_y, carc_ep, carc_age,
+                          obs_alive, obs_x, obs_y, obs_I, obs_R, obs_D)
 from .world import (update_obstacles_vectorized, update_herbs_vectorized,
                    update_carcasses_vectorized, spawn_carcass, rebuild_grids)
 from .genome_traits import (compute_infant_factor_vectorized, populate_trait_cache,
@@ -49,11 +52,12 @@ sim_speed = TARGET_SIM_SPEED
 
 turn = 0
 active_detect_slots = []
+sound_emit_queue = []  # queued from previous tick; cleared after broadcast
 
 # ── Initialize Weight Tensors ────────────────────────────────────────────
 def init_weight_tensors():
-    set_weight_tensors(W1_h, b1_h, W2_h, b2_h, W3_h, b3_h,
-                       W1_c, b1_c, W2_c, b2_c, W3_c, b3_c)
+    set_weight_tensors(W1_h, W2_h, W3_h, b1_h, b2_h, b3_h,
+                       W1_c, W2_c, W3_c, b1_c, b2_c, b3_c)
 
 # ── Control Handler ──────────────────────────────────────────────────────
 def _drain_control():
@@ -285,16 +289,23 @@ def tick_loop():
         scan_results, detect_fired, active_next = run_detection_batch(
             active_detect_slots, x_pos, y_pos,
             animal_grid, herb_grid, obstacle_grid,
-            traits_shared, traits_carn, traits_herb,
             M_F, infant_factor, species, alive
         )
         active_detect_slots = active_next
         
-        # 2b. Sound Broadcast
+        # 2b. Sound Broadcast (use previous tick's emitters)
         sound_inbox.fill(0.0)
+        if len(sound_emit_queue) > 0:
+            emit_slots = np.array([s[0] for s in sound_emit_queue], dtype=np.int32)
+            emit_types = np.array([s[1] for s in sound_emit_queue], dtype=np.int32)
+            emit_strs  = np.array([s[2] for s in sound_emit_queue], dtype=np.int32)
+        else:
+            emit_slots = np.array([], dtype=np.int32)
+            emit_types = np.array([])
+            emit_strs  = np.array([])
         broadcast_sounds_vectorized(
-            np.array([], dtype=np.int32),  # emitters from previous tick
-            np.array([]), np.array([]),
+            emit_slots,
+            emit_types, emit_strs,
             x_pos, y_pos, animal_grid,
             traits_shared, M_F, infant_factor, species, alive
         )
@@ -302,6 +313,9 @@ def tick_loop():
         # 2c. Carcass Scent
         add_carcass_scent_to_inbox(carcass_grid, x_pos, y_pos,
                                    sound_inbox, alive, species, traits_shared)
+
+        # Clear emit queue — will be repopulated during Phase 4 action collection
+        sound_emit_queue.clear()
         
         # ═══════════════════════════════════════════════════════════════
         # Phase 3: Neural Network
@@ -324,8 +338,6 @@ def tick_loop():
                 last_decoded[slot] = {k: v[i] for k, v in decoded_h.items()}
                 # Pre-decode detection params
                 if last_decoded[slot].get("detect_active", False):
-                    theta, R, alpha = decode_outputs(np.array([[0]*16]), True)  # placeholder
-                    # Actually decode from decoded_h
                     dir_n = decoded_h["detect_dir"][i]
                     range_n = decoded_h["detect_range"][i]
                     angle_n = decoded_h["detect_angle"][i]
@@ -461,7 +473,8 @@ def tick_loop():
         
         # Reproduction
         update_mate_seek(herb_idx, carn_idx, decoded_h, decoded_c)
-        pairs = find_reproduction_pairs(np.zeros(MAX_ANIMALS, dtype=np.bool_))  # uses mate_seek_timer
+        seek_mask = alive & (mate_seek_timer > 0)
+        pairs = find_reproduction_pairs(seek_mask)
         for slot_A, slot_B in pairs:
             create_offspring(slot_A, slot_B)
         

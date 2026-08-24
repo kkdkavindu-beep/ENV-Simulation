@@ -78,7 +78,7 @@ def log_entity_creation(entity_id: str, entity_type: str, x: float, y: float,
         ids_writer._flush()  # Immediate flush for registry
 
 # ── Dynamic.jsonl (Per-Turn Events) ─────────────────────────────────────
-turn = 0  # Will be set by tick_loop
+# turn is imported from tick_loop at runtime; do not redeclare here.
 
 def should_log_entity(slot: int) -> bool:
     """Determine if entity should be logged this turn based on LOG_MODE."""
@@ -92,8 +92,9 @@ def should_log_entity(slot: int) -> bool:
 
 def log_tick(current_turn: int):
     """Log per-turn state for sampled entities."""
+    from .tick_loop import turn as _tick_turn
     global turn
-    turn = current_turn
+    turn = _tick_turn
     
     if LOG_MODE == "event_only":
         return  # No periodic logging
@@ -169,4 +170,3 @@ def log_sound_emission(emitter_id: str, signal_type: int, strength: float):
 
 # Import needed
 import numpy as np
-from .animal_model import turn as animal_turn, herb_alive, herb_x, herb_y, herb_ep, carc_alive, carc_x, carc_y, carc_ep

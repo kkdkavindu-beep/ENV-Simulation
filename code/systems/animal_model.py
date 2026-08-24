@@ -131,7 +131,7 @@ def allocate_slot() -> int | None:
 def reset_arrays():
     """Reset all arrays for new run."""
     global next_herb_id, next_carn_id, animal_ids, id_to_slot, last_scan, last_decoded, sound_inbox, turn
-    
+
     turn = 0
     alive.fill(False)
     species.fill(False)
@@ -152,18 +152,27 @@ def reset_arrays():
     genomes.fill(0)
     genome_valid.fill(False)
     generation.fill(0)
-    
+
     W1_h.fill(0); W2_h.fill(0); W3_h.fill(0)
     b1_h.fill(0); b2_h.fill(0); b3_h.fill(0)
     W1_c.fill(0); W2_c.fill(0); W3_c.fill(0)
     b1_c.fill(0); b2_c.fill(0); b3_c.fill(0)
-    
+
     animal_ids = [None] * MAX_ANIMALS
     id_to_slot.clear()
     last_scan = [[] for _ in range(MAX_ANIMALS)]
     last_decoded = [None] * MAX_ANIMALS
     sound_inbox.fill(0.0)
-    
+
+    # World state
+    herb_alive.fill(False)
+    herb_ep.fill(0)
+    carc_alive.fill(False)
+    carc_ep.fill(0)
+    carc_age.fill(0)
+    obs_alive.fill(False)
+    obs_I.fill(0); obs_R.fill(0); obs_D.fill(0)
+
     next_herb_id = 0
     next_carn_id = 0
 

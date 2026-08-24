@@ -100,6 +100,7 @@ def init_world(seed: int = 42):
 # ── Obstacle Update (Vectorized) ─────────────────────────────────────────
 def update_obstacles_vectorized(turn: int):
     """Update all obstacles with local R/D computation."""
+    rng = get_rng()
     alive_idx = np.where(obs_alive)[0]
     if len(alive_idx) == 0:
         return

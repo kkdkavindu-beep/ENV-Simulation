@@ -75,21 +75,22 @@ def create_offspring(slot_A: int, slot_B: int) -> int | None:
     
     return slot
 
-def find_reproduction_pairs(reproduce_signals: np.ndarray) -> list[tuple[int, int]]:
+def find_reproduction_pairs(seek_mask: np.ndarray) -> list[tuple[int, int]]:
     """
     Match animals in mate-seeking state within radius.
+    seek_mask: boolean array indicating which animals are currently seeking.
     Returns list of (slot_A, slot_B) pairs.
     """
     from .animal_model import x_pos, y_pos, alive, species
-    
+
     pairs = []
     rng = get_rng()
-    
+
     for is_herb in [True, False]:
         species_mask = species == is_herb
         # Animals seeking mates with sufficient energy
         seekers = np.where(
-            species_mask & alive & (mate_seek_timer > 0) & (energy >= MIN_ENERGY_REPRODUCE)
+            species_mask & alive & seek_mask & (energy >= MIN_ENERGY_REPRODUCE)
         )[0]
         
         if len(seekers) < 2:
