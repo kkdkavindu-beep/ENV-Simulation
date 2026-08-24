@@ -13,6 +13,8 @@ from .animal_model import (alive, species, x_pos, y_pos, energy, health, fatigue
 # ── Log Writers ──────────────────────────────────────────────────────────
 class LogWriter:
     def __init__(self, path: str, buffer_lines: int = 2000):
+        import os
+        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
         self._f = open(path, 'a', encoding='utf-8', buffering=8 * 1024 * 1024)
         self._buf = []
         self._cap = buffer_lines

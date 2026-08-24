@@ -169,9 +169,13 @@ def checkpoint_to_drive(turn_num: int):
     """Save checkpoint to Google Drive."""
     import pickle, zlib, os
     from .config import DRIVE_BASE, RUN_ID
-    
-    chk_dir = os.path.join(DRIVE_BASE, RUN_ID, "checkpoints")
-    os.makedirs(chk_dir, exist_ok=True)
+
+    try:
+        chk_dir = os.path.join(DRIVE_BASE, RUN_ID, "checkpoints")
+        os.makedirs(chk_dir, exist_ok=True)
+    except OSError:
+        # Drive not mounted or path unavailable — skip checkpoint silently
+        return
     chk_path = os.path.join(chk_dir, f"turn_{turn_num:08d}.pkl.zst")
     
     alive_idx = np.where(alive)[0]

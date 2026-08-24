@@ -71,20 +71,20 @@ def broadcast_sounds_vectorized(
     if not np.any(alive_mask):
         return
     s_min = float(traits_shared_arr[alive_mask, T_SND_SENS].min())
-    
-    for slot in emit_slots:
+
+    for i, slot in enumerate(emit_slots):
         if not alive_arr[slot]:
             continue
-        
-        str_n = int(signal_str_arr[slot])
+
+        str_n = int(signal_str_arr[i])
         if str_n == 0:
             continue
-        
+
         S_emit = compute_S_emit(int(slot), str_n)
         if S_emit <= s_min:
             continue
-        
-        sig_type = int(signal_type_arr[slot])
+
+        sig_type = int(signal_type_arr[i])
         
         # Maximum range
         d_max = (math.log(S_emit) - math.log(s_min)) / ATTENUATION_K
