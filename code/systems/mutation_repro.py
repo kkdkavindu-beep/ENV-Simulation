@@ -59,7 +59,6 @@ def create_offspring(slot_A: int, slot_B: int) -> int | None:
     aid = register_animal(
         slot=slot,
         is_herb=is_herb,
-        genome=child_genome,
         init_x=off_x,
         init_y=off_y,
         init_energy=10.0,

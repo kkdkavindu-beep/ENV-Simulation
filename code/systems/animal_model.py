@@ -190,16 +190,19 @@ def register_animal(slot: int, is_herb: bool,
     active_stealth_boost[slot] = 0.0
     mate_seek_timer[slot] = 0
 
-    # Traits
-    traits_shared[slot] = trait_vals_shared
+    # Traits (skip if None — already populated by populate_trait_cache)
+    if trait_vals_shared is not None:
+        traits_shared[slot] = trait_vals_shared
     if is_herb:
-        traits_herb[slot] = trait_vals_herb
+        if trait_vals_herb is not None:
+            traits_herb[slot] = trait_vals_herb
         traits_carn[slot] = 0
     else:
-        traits_carn[slot] = trait_vals_carn
+        if trait_vals_carn is not None:
+            traits_carn[slot] = trait_vals_carn
         traits_herb[slot] = 0
 
-    health[slot] = trait_vals_shared[T_HEALTH]
+    health[slot] = traits_shared[slot, T_HEALTH]
 
     # Genome
     genomes[slot] = genome_flat

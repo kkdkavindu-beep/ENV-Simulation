@@ -289,7 +289,7 @@ def extract_confirmed_objects(candidates: np.ndarray, theta: float, alpha: float
         obj_angle = math.atan2(dx, dy)
         if obj_angle < 0: obj_angle += TWO_PI
         
-        in_cone = (cone_min <= cmax and cone_min <= obj_angle <= cone_max) or \
+        in_cone = (cone_min <= cone_max and cone_min <= obj_angle <= cone_max) or \
                   (cone_min > cone_max and (obj_angle >= cone_min or obj_angle <= cone_max))
         
         if in_cone:

@@ -221,7 +221,7 @@ def _spawn_progenitors(n_herb: int, n_carn: int):
         genome = create_progenitor_genome(True)
         populate_trait_cache(slot, genome, True)
         load_weights_from_genome(slot, genome, True)
-        register_animal(slot, True, genome,
+        register_animal(slot, True,
                        get_rng().uniform(0, WORLD_SIZE), get_rng().uniform(0, WORLD_SIZE),
                        0.5 * traits_shared[slot, T_MAX_ENERGY],
                        int(0.10 * traits_shared[slot, T_LIFESPAN]),
@@ -233,7 +233,7 @@ def _spawn_progenitors(n_herb: int, n_carn: int):
         genome = create_progenitor_genome(False)
         populate_trait_cache(slot, genome, False)
         load_weights_from_genome(slot, genome, False)
-        register_animal(slot, False, genome,
+        register_animal(slot, False,
                        get_rng().uniform(0, WORLD_SIZE), get_rng().uniform(0, WORLD_SIZE),
                        0.5 * traits_shared[slot, T_MAX_ENERGY],
                        int(0.10 * traits_shared[slot, T_LIFESPAN]),
