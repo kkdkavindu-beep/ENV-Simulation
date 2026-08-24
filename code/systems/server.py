@@ -322,8 +322,18 @@ async def startup_event():
 
 # ── Main ─────────────────────────────────────────────────────────────────
 def run_server():
-    """Run uvicorn server."""
-    uvicorn.run(app, host="0.0.0.0", port=API_PORT, log_level="warning")
+    """Run uvicorn server. Retries once if port is temporarily occupied."""
+    import signal
+    try:
+        uvicorn.run(app, host="0.0.0.0", port=API_PORT, log_level="warning")
+    except OSError as e:
+        if "address already in use" in str(e).lower():
+            print(f"⚠️  Port {API_PORT} briefly occupied — waiting 2s and retrying...")
+            import time
+            time.sleep(2)
+            uvicorn.run(app, host="0.0.0.0", port=API_PORT, log_level="warning")
+        else:
+            raise
 
 if __name__ == "__main__":
     run_server()
