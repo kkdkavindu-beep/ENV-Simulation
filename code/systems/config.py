@@ -160,4 +160,4 @@ WS_PUSH_INTERVAL = 10
 API_PORT = 8080
 # ── Drive / Run Paths ───────────────────────────────────────────
 DRIVE_BASE = "/content/drive/MyDrive/envsim"
-RUN_ID = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")
+RUN_ID = datetime.now().strftime("%Y-%m-%d_%H%M%S")
