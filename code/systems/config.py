@@ -2,6 +2,7 @@
 Configuration constants — single source of truth for all magic numbers.
 """
 import numpy as np
+from datetime import datetime
 
 # ── Global ──────────────────────────────────────────────────────────────
 MAX_ANIMALS   = 2000
@@ -157,3 +158,6 @@ SPECIES_DEFAULTS = {
 # ── Web UI ──────────────────────────────────────────────────────────────
 WS_PUSH_INTERVAL = 10
 API_PORT = 8080
+# ── Drive / Run Paths ───────────────────────────────────────────
+DRIVE_BASE = "/content/drive/MyDrive/envsim"
+RUN_ID = datetime.datetime.now().strftime("%Y-%m-%d_%H%M%S")

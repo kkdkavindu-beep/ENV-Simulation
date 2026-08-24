@@ -70,6 +70,16 @@ id_to_slot: dict[str, int] = {}
 next_herb_id = 0
 next_carn_id = 0
 
+# ── Simulation State ─────────────────────────────────────────────────────
+# Turn counter (set by tick_loop, read by logging)
+turn = 0
+
+# Last decoded NN outputs per animal (for next tick's detection params)
+last_decoded: list[dict | None] = [None] * MAX_ANIMALS
+
+# Sound inbox: (N, 4, 3) float32 — [strength, type, sender_id], sorted strongest-first
+sound_inbox = np.zeros((MAX_ANIMALS, 4, 3), dtype=np.float32)
+
 # ── Spatial Grids (set by world module) ──────────────────────────────────
 animal_grid   = None
 herb_grid     = None
@@ -120,8 +130,9 @@ def allocate_slot() -> int | None:
 
 def reset_arrays():
     """Reset all arrays for new run."""
-    global next_herb_id, next_carn_id, animal_ids, id_to_slot, last_scan
+    global next_herb_id, next_carn_id, animal_ids, id_to_slot, last_scan, last_decoded, sound_inbox, turn
     
+    turn = 0
     alive.fill(False)
     species.fill(False)
     x_pos.fill(0)
@@ -150,6 +161,8 @@ def reset_arrays():
     animal_ids = [None] * MAX_ANIMALS
     id_to_slot.clear()
     last_scan = [[] for _ in range(MAX_ANIMALS)]
+    last_decoded = [None] * MAX_ANIMALS
+    sound_inbox.fill(0.0)
     
     next_herb_id = 0
     next_carn_id = 0

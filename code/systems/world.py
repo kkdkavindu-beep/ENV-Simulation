@@ -11,7 +11,7 @@ from .animal_model import (obstacle_grid, herb_grid, carcass_grid, animal_grid,
                           herb_x, herb_y, herb_ep, herb_alive,
                           carc_x, carc_y, carc_ep, carc_age, carc_alive,
                           obstacle_positions, herb_positions,
-                          grid_cell, GRID_DIM, CELL_SIZE)
+                          grid_cell)
 
 # ── Obstacle R/D Computation ─────────────────────────────────────────────
 def compute_R_local(row: int, col: int) -> float:

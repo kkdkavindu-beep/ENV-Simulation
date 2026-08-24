@@ -173,9 +173,6 @@ def get_detection_candidates(slot: int, theta: float, R: float, alpha: float
     
     return np.array(candidates, dtype=np.float32)
 
-# Need to import obstacle_positions
-from .animal_model import obstacle_positions, herb_positions
-
 # ── Batch Detection Runner ───────────────────────────────────────────────
 def run_detection_batch(active_slots, x_pos_arr, y_pos_arr,
                         animal_grid_arr, herb_grid_arr, obstacle_grid_arr,
